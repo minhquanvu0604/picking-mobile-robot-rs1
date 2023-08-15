@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>picking-mobile-robot-rs1</name>
+  <version>0.1.0</version>
+  <description>
+    This is a robotic project serving the Robotics Studio 1 subject.
+  </description>
+  <license>Apache 2.0</license>
+  <license>MIT</license>
+  <author email="quanvu0604@gmail.com">Minh Quan Vu</author>
+  <maintainer email="quanvu0604@gmail.com">Minh Quan Vu</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+<!-- 
+  <exec_depend>turtlebot3_bringup</exec_depend>
+  <exec_depend>turtlebot3_description</exec_depend>
+  <exec_depend>turtlebot3_example</exec_depend>
+  <exec_depend>turtlebot3_navigation</exec_depend>
+  <exec_depend>turtlebot3_slam</exec_depend>
+  <exec_depend>turtlebot3_teleop</exec_depend>
+-->  
+ 
+  <export><metapackage/></export>
+  
+</package>
