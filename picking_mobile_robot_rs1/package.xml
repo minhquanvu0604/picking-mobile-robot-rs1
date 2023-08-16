@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>picking-mobile-robot-rs1</name>
+  <name>picking_mobile_robot_rs1</name>
   <version>0.1.0</version>
   <description>
     This is a robotic project serving the Robotics Studio 1 subject.
