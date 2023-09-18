@@ -1,4 +1,4 @@
-image: /home/quanvu/uts/rstudio1/src/picking-mobile-robot-rs1/picking_mobile_robot_rs1_gazebo/warehouse_map/warehouse_map_v2.pgm
+image: warehouse_map_v2.pgm
 resolution: 0.050000
 #origin: [-6.49751300000, -9.890534000000, 0.000000]
 #origin: [0, 0.0000, 0.000000]
