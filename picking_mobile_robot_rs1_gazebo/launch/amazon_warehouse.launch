@@ -3,10 +3,12 @@
   <arg name="x_pos" default="-6.0" />
   <arg name="y_pos" default="10.0" />
   <arg name="z_pos" default="0.0" />
+  <arg name="world_name"
+    default="$(find picking_mobile_robot_rs1_gazebo)/worlds/41068_world_v4.world" />
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name"
-      value="$(find picking_mobile_robot_rs1_gazebo)/worlds/41068_world_v3.world" />
+      value="$(arg world_name)" />
     <arg name="paused" value="false" />
     <arg name="use_sim_time" value="true" />
     <arg name="gui" value="true" />

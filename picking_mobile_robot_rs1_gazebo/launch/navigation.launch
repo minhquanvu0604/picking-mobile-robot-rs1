@@ -1,6 +1,6 @@
 <launch>
   <arg name="map_file"
-    default="$(find picking_mobile_robot_rs1_gazebo)/warehouse_map/warehouse_map.yaml" />
+    default="$(find picking_mobile_robot_rs1_gazebo)/warehouse_map/warehouse_map_v3.yaml" />
 
   <include file="$(find turtlebot3_navigation)/launch/turtlebot3_navigation.launch">
     <arg name="map_file" value="$(arg map_file)" />
