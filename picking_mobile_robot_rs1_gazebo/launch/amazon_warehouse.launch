@@ -3,16 +3,20 @@
   <arg name="x_pos" default="-6.0" />
   <arg name="y_pos" default="10.0" />
   <arg name="z_pos" default="0.0" />
+
   <arg name="world_name"
     default="$(find picking_mobile_robot_rs1_gazebo)/worlds/41068_world_v4.world" />
+  <arg name="gui" default="true" />
+  <arg name="headless" default="false" />
+
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name"
       value="$(arg world_name)" />
     <arg name="paused" value="false" />
     <arg name="use_sim_time" value="true" />
-    <arg name="gui" value="true" />
-    <arg name="headless" value="false" />
+    <arg name="gui" value="$(arg gui)" />
+    <arg name="headless" value="$(arg headless)" />
     <arg name="debug" value="false" />
   </include>
 
