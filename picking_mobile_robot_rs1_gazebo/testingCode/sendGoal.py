@@ -1,38 +1,24 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import rospy
 from geometry_msgs.msg import PoseStamped
 from move_base_msgs.msg import MoveBaseActionResult
 
+import actionlib
+from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
+
 class GoalPublisher:
     def __init__(self):
         rospy.init_node('goal_publisher_node', anonymous=True)
-        self.goal_publisher = rospy.Publisher('/move_base_simple/goal', PoseStamped, queue_size=1)
-        
-        self.result_subcriber = rospy.Subscriber('/move_base/result', MoveBaseActionResult, self.result_callback)
 
-        self.result = None
-
-    def result_callback(self, msg):
-        # Access and print the result field of the MoveBaseActionResult message
-        self.result = msg.status.text
-        print("Received result:", self.result)
-    
-    
-    def letter_position(self, value):
-        # Convert the value to lowercase to handle both uppercase and lowercase letters
-        value = value.lower()
+        # Using ros action
+        self.client = actionlib.SimpleActionClient('move_base',MoveBaseAction)
         
-        # Check if the value is a single alphabetical character
-        if len(value) == 1 and value.isalpha():
-            # Calculate the position in the alphabet (1-based)
-            position = ord(value) - ord('a') + 1
-            return position
-        
-        # If the value is not a single alphabetical character, return None
-        return None
-    
+        self.client.wait_for_server()
 
+        self.list_index = None
+    
+    # question?????????
     def bubble_sort(self, currentGoalList):
         n = len(currentGoalList)
         for i in range(n):
@@ -49,29 +35,6 @@ class GoalPublisher:
             # If no two elements were swapped in inner loop, the array is already sorted
             if not swapped:
                 break
-    
-    def generate_goal(self):
-
-        goalList = []
-
-        # Get number of product
-        num = int(input("Enter number of product: "))
-
-        for i in num:
-            # Get product
-            product = input("Enter the section: ")
-
-            # Get first letter of product
-            first_letter = product[0]
-            
-            # Get the goal correspond to first letter of product
-            goal = self.letter_position(first_letter)
-
-            goalList.append(goal)
-
-        newGoalList = self.bubble_sort(goalList)
-
-        return newGoalList
     
 
     def generate_pose(self, goal):
@@ -105,49 +68,36 @@ class GoalPublisher:
         return goalPose
     
 
-    def publish_goal(self):
-        goalList = self.generate_goal()
+    def run_mission(self):
 
-        # this is only for idea //////////////////////////////
-        for goal in goalList:
-            goalPose = self.generate_pose(goal)
-            goal_msg = PoseStamped()
-            goal_msg.pose.position.x = goalPose[0]
-            goal_msg.pose.position.y = goalPose[1]
-            goal_msg.pose.position.z = 0.0
-            goal_msg.pose.orientation.x = 0.0
-            goal_msg.pose.orientation.y = 0.0
-            goal_msg.pose.orientation.z = 0.0
-            goal_msg.pose.orientation.w = 1.0
-            
-            # Set the frame ID (e.g., 'map' or any relevant frame)
-            goal_msg.header.frame_id = 'map'
+        goal_msg = MoveBaseGoal()
 
-            # Set the timestamp
-            # goal_msg.header.stamp = rospy.Time.now()
+        goal_msg.target_pose.header.frame_id = 'map'
+
+        seq += 1
+
+        goal_msg.target_pose.header.stamp = rospy.Time.now()
+
+        for i in (self.list_index):
+            goalPose = self.generate_pose(i)
+
+            goal_x = goalPose[0]
+            goal_y = goalPose[1]
+
+            goal_msg.target_pose.pose.position.x = goal_x
+            goal_msg.target_pose.pose.position.y = goal_y
+            goal_msg.target_pose.pose.position.z = 0
+            goal_msg.target_pose.pose.orientation.x = 0
+            goal_msg.target_pose.pose.orientation.y = 0
+            goal_msg.target_pose.pose.orientation.z = 0
+            goal_msg.target_pose.pose.orientation.w = 1
 
             # Publish the goal message
-            self.goal_publisher.publish(goal_msg)
-            while True:
-                if self.result == "Goal reached.":
-                    break
-            rospy.sleep(1)
-        # //////////////////////////////////////
-        
-        # Set the position and orientation values (you can modify these as needed)
-        goal_msg.pose.position.x = -6.0
-        goal_msg.pose.position.y = 10
+            self.client.send_goal(goal_msg)
 
-        goal_msg.pose.position.z = 0.0
-        goal_msg.pose.orientation.x = 0.0
-        goal_msg.pose.orientation.y = 0.0
-        goal_msg.pose.orientation.z = 0.0
-        goal_msg.pose.orientation.w = 1.0
+            # Wait for result, turtlebot 
+            self.client.wait_for_result()
 
-        goal_msg.header.frame_id = 'map'
-
-        # Publish the goal message
-        self.goal_publisher.publish(goal_msg)
         rospy.sleep(1)
 
 
@@ -159,4 +109,3 @@ if __name__ == '__main__':
     except rospy.ROSInterruptException:
         print("FAIL")
         pass
-
