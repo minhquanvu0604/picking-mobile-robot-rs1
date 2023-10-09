@@ -7,6 +7,9 @@ from move_base_msgs.msg import MoveBaseActionResult
 import actionlib
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 
+#NEED TO ADD PUBLISHER TO CONSUMER TOPIC (/BATTERY/CONSUMER/0) AT 9 AMPS WHILE ROBOT IS MOVING. 
+#NEED TO ADD SERVICE CALL TO BATTERY CHARGE TO TOP UP BATTERY WHEN AT HOME STATION
+#NEED TO ADD BATTERY CHECKER BEFORE MOVING TO RETURN TO HOME BEFORE MOVING. 
 class GoalPublisher:
     def __init__(self):
         rospy.init_node('goal_publisher_node', anonymous=True)
