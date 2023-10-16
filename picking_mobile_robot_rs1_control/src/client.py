@@ -53,6 +53,9 @@ class CsvReaderNode:
         rospy.loginfo("Waiting for move_base action server...")
         self.move_base_client.wait_for_server()
 
+        self.consumer0 = rospy.Publisher('battery/consumer/0', Float32, queue_size=5)
+        self.consumer1 = rospy.Publisher('battery/consumer/1', Float32, queue_size= 5)
+
         rospy.loginfo("Connected to move_base action server")
 
     
@@ -126,37 +129,32 @@ class CsvReaderNode:
             print(traceback.format_exc())
             return response
         
-        # Add additional variable latter
-        while (self.queue):
-            # Send the first location in the list
-            self.send_next_goal()
-        
-        if not self.queue:
-            goal_msg = MoveBaseGoal()
-            goal_msg.target_pose.header.frame_id = 'map'
-            goal_msg.target_pose.header.stamp = rospy.Time.now()
-
-            goal_msg.target_pose.pose.position.x = -6
-            goal_msg.target_pose.pose.position.y = 10
-            goal_msg.target_pose.pose.position.z = 0
-            goal_msg.target_pose.pose.orientation.x = 0
-            goal_msg.target_pose.pose.orientation.y = 0
-            goal_msg.target_pose.pose.orientation.z = 0
-            goal_msg.target_pose.pose.orientation.w = 1
-
-
-            rospy.loginfo("Backing starting position")
-
-            # Publish the goal message
-            self.move_base_client.send_goal(goal_msg)
-            
-            # Wait for result, turtlebot 
-            self.move_base_client.wait_for_result()
-
-            rospy.loginfo("FINISHING")
-
         return response
+    
 
+    def return_home(self):
+        goal_msg = MoveBaseGoal()
+        goal_msg.target_pose.header.frame_id = 'map'
+        goal_msg.target_pose.header.stamp = rospy.Time.now()
+
+        goal_msg.target_pose.pose.position.x = -6
+        goal_msg.target_pose.pose.position.y = 10
+        goal_msg.target_pose.pose.position.z = 0
+        goal_msg.target_pose.pose.orientation.x = 0
+        goal_msg.target_pose.pose.orientation.y = 0
+        goal_msg.target_pose.pose.orientation.z = 0
+        goal_msg.target_pose.pose.orientation.w = 1
+
+
+        rospy.loginfo("Backing starting position")
+
+        # Publish the goal message
+        self.move_base_client.send_goal(goal_msg)
+        
+        # Wait for result, turtlebot 
+        self.move_base_client.wait_for_result()
+
+        rospy.loginfo("FINISHING")
 
     # Get the goal pose from a number between 1-26 
     def get_pose(self, goal):
@@ -234,6 +232,9 @@ class CsvReaderNode:
 
 
             rospy.loginfo("Sending next goal...")
+            movingConsumption = Float32
+            movingConsumption.data = 4.5
+            self.consumer1.publish(movingConsumption)
 
             # Publish the goal message
             self.move_base_client.send_goal(goal_msg)
@@ -243,6 +244,8 @@ class CsvReaderNode:
 
             # Wait for placing product on turtlebot
             rospy.loginfo("Waiting for placing product on turtlebot")
+            movingConsumption.data = 0
+            self.consumer1.publish(movingConsumption)
             rospy.sleep(5.0)
 
 
@@ -250,4 +253,13 @@ class CsvReaderNode:
 
 if __name__ == "__main__":
     node = CsvReaderNode()
-    rospy.spin()
+    rate = rospy.Rate(60)
+    while not rospy.is_shutdown():
+        if (node.queue):
+            node.send_next_goal()
+        else:
+            node.return_home()
+        baseConsumption = Float32
+        baseConsumption.data = 1.5 
+        node.consumer0.publish(baseConsumption)
+        rate.sleep()
