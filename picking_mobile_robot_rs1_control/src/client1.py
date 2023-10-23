@@ -10,6 +10,7 @@ import rospy
 import csv
 import rospkg
 import actionlib
+from nav_msgs.msg import Odometry
 
 from std_srvs.srv import Trigger, TriggerResponse
 from collections import deque
@@ -71,7 +72,7 @@ class CsvReaderNode:
             self.return_home()
 
             rospy.loginfo("CHARGING")
-            self.charger(True)
+            self.charger()
             rospy.sleep(10)
             # reset the voltage back to normal condition
 
@@ -110,12 +111,12 @@ class CsvReaderNode:
         # Publish the goal message
         self.move_base_client.send_goal(goal_msg)
         moveConsume = Float32()
-        moveConsume.date = 4.5
+        moveConsume.data = 4.5
         self.consumer1.publish(moveConsume)
         
         # Wait for result, turtlebot 
         self.move_base_client.wait_for_result()
-        moveConsume.date = 0
+        moveConsume.data = 0
         self.consumer1.publish(moveConsume)
 
     
@@ -124,8 +125,8 @@ class CsvReaderNode:
         goal_msg.target_pose.header.frame_id = 'map'
         goal_msg.target_pose.header.stamp = rospy.Time.now()
 
-        goal_msg.target_pose.pose.position.x = -6
-        goal_msg.target_pose.pose.position.y = 10
+        goal_msg.target_pose.pose.position.x = -3
+        goal_msg.target_pose.pose.position.y = 9
         goal_msg.target_pose.pose.position.z = 0
         goal_msg.target_pose.pose.orientation.x = 0
         goal_msg.target_pose.pose.orientation.y = 0
@@ -138,25 +139,33 @@ class CsvReaderNode:
 
         rospy.loginfo("DEPOSITED")
 
+        rospy.sleep(5.0)
+
     def return_home(self):
-        goal_msg = MoveBaseGoal()
-        goal_msg.target_pose.header.frame_id = 'map'
-        goal_msg.target_pose.header.stamp = rospy.Time.now()
+        odom = rospy.wait_for_message('/odom', Odometry)
+        if abs(odom.pose.pose.position.x - (-6)) < 0.3 and abs(odom.pose.pose.position.y - (10)) < 0.3:
+            pass
+        else:
+            goal_msg = MoveBaseGoal()
+            goal_msg.target_pose.header.frame_id = 'map'
+            goal_msg.target_pose.header.stamp = rospy.Time.now()
 
-        goal_msg.target_pose.pose.position.x = -6
-        goal_msg.target_pose.pose.position.y = 10
-        goal_msg.target_pose.pose.position.z = 0
-        goal_msg.target_pose.pose.orientation.x = 0
-        goal_msg.target_pose.pose.orientation.y = 0
-        goal_msg.target_pose.pose.orientation.z = 0
-        goal_msg.target_pose.pose.orientation.w = 1
+            goal_msg.target_pose.pose.position.x = -6
+            goal_msg.target_pose.pose.position.y = 10
+            goal_msg.target_pose.pose.position.z = 0
+            goal_msg.target_pose.pose.orientation.x = 0
+            goal_msg.target_pose.pose.orientation.y = 0
+            goal_msg.target_pose.pose.orientation.z = 0
+            goal_msg.target_pose.pose.orientation.w = 1
 
 
-        rospy.loginfo("RETURNING HOME")
+            rospy.loginfo("RETURNING HOME")
 
-        self.moveRobot(goal_msg)
+            self.moveRobot(goal_msg)
 
-        rospy.loginfo("FINISHED")
+
+
+            rospy.loginfo("FINISHED")
 
     # Get the goal pose from a number between 1-26 
     def get_pose(self, goal):
@@ -215,7 +224,7 @@ class CsvReaderNode:
     def send_next_goal(self):
         if self.queue:
             # Check the battery firt
-            # self.battery_state_check()
+            self.battery_state_check()
 
             next_goal_number = self.queue.popleft()
             goal_pose = self.get_pose(next_goal_number)
@@ -247,12 +256,20 @@ class CsvReaderNode:
 if __name__ == "__main__":
     node = CsvReaderNode()
     rate = rospy.Rate(60)
+
+    flag = False
+
     while not rospy.is_shutdown():
         if (node.queue):
             node.send_next_goal()
+            flag = True
         else:
-            node.return_home()
-        baseConsumption = Float32
+            if (flag == True):
+                node.deposit_zone()
+                flag = False
+            else:
+                node.return_home()
+        baseConsumption = Float32()
         baseConsumption.data = 1.5 
         node.consumer0.publish(baseConsumption)
         rate.sleep()
