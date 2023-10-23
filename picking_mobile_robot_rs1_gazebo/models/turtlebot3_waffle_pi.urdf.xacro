@@ -213,9 +213,7 @@
     <child link="camera_rgb_optical_frame"/>
   </joint>
   <link name="camera_rgb_optical_frame"/>
-  
   <xacro:include filename="$(find gazebo_ros_battery)/xacro/battery.xacro"/>
   <xacro:battery sensor_name="battery" frame_id="battery_link" 
                  params_yaml="$(find picking_mobile_robot_rs1_gazebo)/params/turtlebot_battery.yaml"/>
-
 </robot>
