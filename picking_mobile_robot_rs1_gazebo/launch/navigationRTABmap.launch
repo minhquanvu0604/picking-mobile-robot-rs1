@@ -1,0 +1,72 @@
+<launch>
+  <!-- Arguments -->
+  <arg name="model" default="$(env TURTLEBOT3_MODEL)" doc="model type [burger, waffle, waffle_pi]"/>
+  <arg name="map_file" default="$(find picking_mobile_robot_rs1_gazebo)/warehouse_map/percy.yaml"/>
+  <arg name="open_rviz" default="true"/>
+  <arg name="move_forward_only" default="false"/>
+  <arg name="rtabmap_args" default=""/>
+  <arg name="localization" default="false"/>
+  <arg name="new_db" default="false"/>
+  <arg if="$(arg new_db)" name="database_path" default="$(find picking_mobile_robot_rs1_gazebo)/worlds/database/rtabmapNEW.db"/>
+  <arg unless="$(arg new_db)" name="database_path" default="$(find picking_mobile_robot_rs1_gazebo)/worlds/database/rtabmap.db"/>
+  
+
+  <!-- Turtlebot3 -->
+  <include file="$(find turtlebot3_bringup)/launch/turtlebot3_remote.launch">
+    <arg name="model" value="$(arg model)" />
+  </include>
+
+  
+  <!-- Map server -->
+  <group>
+    <remap from="map" to="gt_map"/>
+    <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)"/>
+  </group>
+  
+  <group ns="rtabmap">
+
+    <node name="rtabmap" pkg="rtabmap_slam" type="rtabmap" output="screen" args="$(arg rtabmap_args)">
+      <param name="database_path"       type="string" value="$(arg database_path)"/>
+      <param name="frame_id"            type="string" value="base_footprint"/>
+      <param name="subscribe_rgb"   type="bool" value="false"/>
+      <param name="subscribe_depth" type="bool" value="false"/>
+      <param name="subscribe_rgbd" type="bool" value="false"/>
+      <param name="subscribe_scan"      type="bool"   value="true"/>
+      <param name="approx_sync"         type="bool"   value="true"/>
+      
+
+      <!-- use actionlib to send goals to move_base -->
+      <param name="use_action_for_goal" type="bool" value="true"/>
+      <remap from="move_base"            to="/move_base"/>
+
+      <!-- inputs -->
+      <remap from="scan"            to="/scan"/>
+      <remap from="odom"            to="/odom"/>
+      <remap from="rgbd_image"       to="rgbd_image"/>
+
+      <!-- output -->
+      <remap from="grid_map" to="/map"/>
+
+      <!-- RTAB-Map's parameters -->
+      <param name="Reg/Strategy"                 type="string" value="1"/>
+      <param name="Reg/Force3DoF"                type="string" value="true"/>
+      <param name="GridGlobal/MinSize"           type="string" value="20"/>
+
+      <!-- localization mode -->
+      <param     if="$(arg localization)" name="Mem/IncrementalMemory" type="string" value="false"/>
+      <param unless="$(arg localization)" name="Mem/IncrementalMemory" type="string" value="true"/>
+    </node>
+  </group>
+
+  <!-- move_base -->
+  <include file="$(find turtlebot3_navigation)/launch/move_base.launch">
+    <arg name="model" value="$(arg model)" />
+    <arg name="move_forward_only" value="$(arg move_forward_only)"/>
+  </include>
+
+  <!-- rviz -->
+  <group if="$(arg open_rviz)"> 
+    <node pkg="rviz" type="rviz" name="rviz" required="true"
+          args="-d $(find picking_mobile_robot_rs1_gazebo)/rviz/rtabMapConfig.rviz"/>
+  </group>
+</launch>

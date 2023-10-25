@@ -5,7 +5,7 @@
   <arg name="z_pos" default="0.0" />
 
   <arg name="world_name"
-    default="$(find picking_mobile_robot_rs1_gazebo)/worlds/41068_world_v4.world" />
+    default="$(find picking_mobile_robot_rs1_gazebo)/worlds/41068_world_v3.world" />
   <arg name="gui" default="true" />
   <arg name="headless" default="false" />
 
