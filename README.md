@@ -27,5 +27,5 @@ roslaunch picking_mobile_robot_rs1_gazebo navigationRTABmap.launch
 ```
 If wanting to test a new database, set the new_db parameter to true
 ```
-roslaunch picking_mobile_robot_rs1_gazebo amazon_warehouse.launch new_db:=true
+roslaunch picking_mobile_robot_rs1_gazebo navigationRTABmap.launch new_db:=true
 ```
