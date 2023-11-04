@@ -1,0 +1,14 @@
+{
+    "name": "noetic desktop-full",
+    "dockerFile": "Dockerfile",
+    "runArgs": [
+        "--privileged",
+        "--network=host"
+    ],
+    "workspaceMount": "source=${localWorkspaceFolder},target=/home/vscode/catkin_ws/src/${localWorkspaceFolderBasename},type=bind",
+    "workspaceFolder": "/home/vscode/catkin_ws/src/${localWorkspaceFolderBasename}",
+    "mounts": [
+        "source=${localEnv:HOME}${localEnv:USERPROFILE}/.bash_history,target=/home/vscode/.bash_history,type=bind",
+        "source=${localWorkspaceFolder}/.devcontainer/bash_aliases,target=/home/vscode/.bash_aliases,type=bind"
+    ]
+}
